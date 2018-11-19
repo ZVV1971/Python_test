@@ -45,10 +45,10 @@ canvas.setFont('Arial', 13)
 #Prepare in-memory PDF with inscription
 #to be merged into the existing PDFs
 canvas.rotate(90)
-canvas.drawString(20, -A4[0]+35, "Копия верна")
-canvas.drawString(20, -A4[0]+50, args.Name)
-canvas.drawString(20, -A4[0]+65, '')
-canvas.drawString(20, -A4[0]+80, args.Position)
+canvas.drawString(20, -A4[0]+35, args.Position)
+canvas.drawString(20, -A4[0]+50, '')
+canvas.drawString(20, -A4[0]+65, args.Name)
+canvas.drawString(20, -A4[0]+80, "Копия верна")
 canvas.save()
 
 # move to the beginning of the StringIO buffer
@@ -67,7 +67,8 @@ for pdf_file in args.FileNames:
             page.mergePage(page2)
             output.addPage(page)
         # finally, write "output" to a real file
-        outputStream = open(args.Prefix + '_' + os.path.basename(pdf_file), "wb")
+        outputStream = open(args.Prefix + '_' + os.path.basename(pdf_file),
+                            "wb")
         output.write(outputStream)
         outputStream.close()
         #Inform user about changes made
