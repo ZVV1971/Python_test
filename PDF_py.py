@@ -10,7 +10,7 @@ import os
 
 CONST_POSITION = 'Директор'
 CONST_FIO = 'А.В. Кимленко'
-CONST_PREFIX = 'Processed'
+CONST_PREFIX = '#'
 
 parser = argparse.ArgumentParser(description='Gets PDFs and merges into them '
                                  '"copy valid" inscription '
@@ -45,9 +45,9 @@ canvas.setFont('Arial', 13)
 #Prepare in-memory PDF with inscription
 #to be merged into the existing PDFs
 canvas.rotate(90)
-canvas.drawString(20, -A4[0]+35, args.Position)
+canvas.drawString(20, -A4[0]+35, args.Name)
 canvas.drawString(20, -A4[0]+50, '')
-canvas.drawString(20, -A4[0]+65, args.Name)
+canvas.drawString(20, -A4[0]+65, args.Position)
 canvas.drawString(20, -A4[0]+80, "Копия верна")
 canvas.save()
 
@@ -72,7 +72,7 @@ for pdf_file in args.FileNames:
         output.write(outputStream)
         outputStream.close()
         #Inform user about changes made
-        print(pdf_file + '--->' + args.Prefix + '_' + pdf_file)
+        print(pdf_file + '--->' + args.Prefix + '_' + os.path.basename(pdf_file))
     else:
         #Signal that wrong file has been fed up
         print(pdf_file, 'wrong file name or path')
