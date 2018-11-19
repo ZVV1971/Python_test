@@ -67,7 +67,7 @@ for pdf_file in args.FileNames:
             page.mergePage(page2)
             output.addPage(page)
         # finally, write "output" to a real file
-        outputStream = open(args.Prefix + '_' + pdf_file, "wb")
+        outputStream = open(args.Prefix + '_' + os.path.basename(pdf_file), "wb")
         output.write(outputStream)
         outputStream.close()
         #Inform user about changes made
