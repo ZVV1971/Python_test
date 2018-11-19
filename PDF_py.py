@@ -12,8 +12,9 @@ CONST_POSITION = 'Директор'
 CONST_FIO = 'А.В. Кимленко'
 CONST_PREFIX = 'Processed'
 
-parser = argparse.ArgumentParser(description='Gets PDFs and merges into them'
-                                 '"copy valid" inscription.')
+parser = argparse.ArgumentParser(description='Gets PDFs and merges into them '
+                                 '"copy valid" inscription '
+                                 'with corresponding signatures')
 parser.add_argument('-p', dest = 'Position',
                     help = 'Position of the signing person',
                     default = CONST_POSITION, type = str,
@@ -61,6 +62,7 @@ for pdf_file in args.FileNames:
         # add the "watermark" (which is the new pdf) on the existing page
         for i in range(existing_pdf.getNumPages()):
             page = existing_pdf.getPage(i)
+            #Only one page is assumed in a inscription
             page2 = new_pdf.getPage(0)
             page.mergePage(page2)
             output.addPage(page)
@@ -68,6 +70,8 @@ for pdf_file in args.FileNames:
         outputStream = open(args.Prefix + '_' + pdf_file, "wb")
         output.write(outputStream)
         outputStream.close()
+        #Inform user about changes made
         print(pdf_file + '--->' + args.Prefix + '_' + pdf_file)
     else:
+        #Signal that wrong file has been fed up
         print(pdf_file, 'wrong file name or path')
