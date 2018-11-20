@@ -1,4 +1,4 @@
-from PyPDF2 import PdfFileWriter, PdfFileReader
+﻿from PyPDF2 import PdfFileWriter, PdfFileReader
 import io
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics 
@@ -8,9 +8,9 @@ from reportlab.lib.pagesizes import A4
 import argparse
 import os
 
-CONST_POSITION = 'Директор'
-CONST_FIO = 'А.В. Кимленко'
-CONST_PREFIX = '#'
+CONST_POSITION = 'Директор'  #Position of the signing person
+CONST_FIO = 'А.В. Кимленко'  #Name and Initials of the signin person
+CONST_PREFIX = '#'	     #Prefix character preceding the name of the file (to distinguish)		
 
 parser = argparse.ArgumentParser(description='Gets PDFs and merges into them '
                                  '"copy valid" inscription '
