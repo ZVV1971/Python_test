@@ -62,7 +62,7 @@ for pdf_file in args.FileNames:
         # add the "watermark" (which is the new pdf) on the existing page
         for i in range(existing_pdf.getNumPages()):
             page = existing_pdf.getPage(i)
-            #Only one page is assumed in a inscription
+            #Only one page is assumed in an inscription
             page2 = new_pdf.getPage(0)
             #In case source PDF is larger than A4 (as sometimes happens with
             #TMZ certificates) scale it down/up to A4
