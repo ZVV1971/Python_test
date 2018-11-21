@@ -64,7 +64,12 @@ for pdf_file in args.FileNames:
             page = existing_pdf.getPage(i)
             #Only one page is assumed in a inscription
             page2 = new_pdf.getPage(0)
+            #In case source PDF is larger than A4 (as sometimes happens with
+            #TMZ certificates) scale it down/up to A4
+            page.scaleTo(A4[0],A4[1])
+            #Merge "watermark" into A4 source page
             page.mergePage(page2)
+            #put to the output stream
             output.addPage(page)
         # finally, write "output" to a real file
         outputStream = open(args.Prefix + '_' + os.path.basename(pdf_file),
