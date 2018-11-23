@@ -5,35 +5,24 @@ import re
 
 root = Tk()
 
-class CreateToolTip(object):
-    '''
-    create a tooltip for a given widget
-    '''
-    def __init__(self, widget, text='widget info'):
-        self.widget = widget
-        self.text = text
-        self.widget.bind("<Enter>", self.enter)
-        self.widget.bind("<Leave>", self.close)
-    def enter(self, event=None):
-        x = y = 0
-        x, y, cx, cy = self.widget.bbox("insert")
-        x += self.widget.winfo_rootx() + 25
-        y += self.widget.winfo_rooty() + 20
-        # creates a toplevel window
-        self.tw = tk.Toplevel(self.widget)
-        # Leaves only the label and removes the app window
-        self.tw.wm_overrideredirect(True)
-        self.tw.wm_geometry("+%d+%d" % (x, y))
-        label = tk.Label(self.tw, text=self.text, justify='left',
-                       background='yellow', relief='solid', borderwidth=1,
-                       font=("times", "8", "normal"))
-        label.pack(ipadx=1)
-    def close(self, event=None):
-        if self.tw:
-            self.tw.destroy()
+TEST_ROW = 22
+TEST_COLUM = 6
+TEST_VALUE = 'I. ТОВАРНЫЙ РАЗДЕЛ'
+#Begin of cells with additional info
+INFO_ROW = 28
+INFO_COLUMN = 13
+CONSIGNEE_ROW= 16
+CONSIGNEE_COLUMN = 3
+AGREEMENT_ROW = 17
+AGREEMENT_COLUMN = 3
+TTN_NUMBER_ROW = 3
+TTN_NUMBER_COLUMN = 13
+MATCH_PATTERN = r'(\d{8})'
 
 
 class MyFirstGUI:
+
+    fileData=[]
         
     def __init__(self, master):
         self.master = master
@@ -49,7 +38,7 @@ class MyFirstGUI:
         
         self.menubar.add_cascade(label="File", menu=menu, state="normal")
 
-        menu2.add_command(label="Copies")
+        menu2.add_command(label="Copies", command=self.copies)
         
         self.menubar.add_cascade(label="Operations", menu=menu2,
                                      state="disabled")
@@ -66,8 +55,54 @@ class MyFirstGUI:
                                           multiple=True
                                           )
         for nm in filename:
-            print(nm)
+
+            try:
+                fn = TTNReader(nm)
+                self.fileData.append(fn)
+            except:
+                continue
+            
         self.menubar.entryconfig("Operations", state="normal")
+
+    def copies(self):
+        """
+        Prepares PDFs with inscriptions
+        """
+        for ttn in self.fileData:
+            print(ttn.TTN_data["path"])
+        
+class TTNReader():
+
+    TTN_data = {}
+    
+    def __init__(self, path):
+        if self.CheckCorrectExcelFile(path):
+            self.TTN_data["path"]=path
+        else:
+            raise ValueError()
+    
+    def CheckCorrectExcelFile(self, path_to_file):
+        """
+        Checks if the opened Excel file is a file with TTN
+
+        returns True if correct
+        otherwise returns False
+        """
+
+        res =False
+
+        try:
+            with xlrd.open_workbook(path_to_file,
+                                    encoding_override='cp1251') as book:
+                sheet = book.sheets()[0]
+                if sheet.cell(TEST_ROW, TEST_COLUM).value == TEST_VALUE:
+                    res = True
+                else:
+                    res = False
+        except:
+            pass
+        finally:
+            return res
 
 my_gui = MyFirstGUI(root)
 root.mainloop()
