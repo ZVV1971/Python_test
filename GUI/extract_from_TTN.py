@@ -8,6 +8,7 @@ import dateparser
 
 root = Tk()
 
+#Vlues to test if XLS is really TTN
 TEST_ROW = 22
 TEST_COLUM = 6
 TEST_VALUE = 'I. ТОВАРНЫЙ РАЗДЕЛ'
@@ -26,7 +27,10 @@ MATCH_PATTERN = r'(\d{8})' #QC match pattern
 LAST_ROW_IDENTIFIER = 'С товаром переданы документы:'
 COPY_TEST_COLUMN = 1 #colum where inscription of
                      #complacency certificates copy is stored
-ADDRESS_BEGINNING_PATTERN = 'г\.|Минская|Витебская|Могилевская|Гомельская|Гродненская|Брестская|Республика|Минск'
+COPY_TEST_START_ROW = 29 #Begin of the possible last row
+COPY_TEST_END_ROW = 1000 #Supposed end of the TTN
+ADDRESS_BEGINNING_PATTERN = 'г\.|Минская\w|Витебская\w|Могилевская\w|Гомельская\w|Гродненская\w|Брестская\w|Республика'
+COMPLACENCY_CERT_PATTERN = 'BY\/\d{3}\s(?:\d{2}\.){2}\d{3}\s(\d{5})'
 
 class MyFirstGUI:
 
@@ -121,24 +125,30 @@ class TTNReader(object):
         """
 
         cert_array={}
+        comp_cert_array={}
 
         try:
             with xlrd.open_workbook(path_to_file,
                                     encoding_override='cp1251') as book:
                 sheet = book.sheets()[0]
                 #reading other data from the file
-                self.TTN_data["Agreement"] = sheet.cell(AGREEMENT_ROW, AGREEMENT_COLUMN)
-                self.TTN_data["TTN_Number"] = sheet.cell(TTN_NUMBER_ROW, TTN_NUMBER_COLUMN)
-                Cons = sheet.cell(CONSIGNEE_ROW, CONSIGNEE_COLUMN)
-                res = re.findall(Cons, ADDRESS_BEGINNING_PATTERN. re.M)
-                #self.TTN_data["Consignee"] = re.findall(Cons, ADDRESS_BEGINNING_PATTERN. re.M)
+                self.TTN_data["Agreement"] = sheet.cell(AGREEMENT_ROW, AGREEMENT_COLUMN).value
+                self.TTN_data["TTN_Number"] = int(sheet.cell(TTN_NUMBER_ROW, TTN_NUMBER_COLUMN).value)
+                Cons = sheet.cell(CONSIGNEE_ROW, CONSIGNEE_COLUMN).value
+                matches = re.finditer(ADDRESS_BEGINNING_PATTERN, Cons, re.M)
+                for matchNum, match in enumerate(matches):
+                     self.TTN_data["Consignee"] = Cons[:match.start() - 1]
+                     #need only the first
+                     break
                 self.TTN_data["TTN_Date"] = dateparser.parse(sheet.cell(DATE_ROW, DATE_COLUMN).value)
                 self.TTN_data["Certificates"] = {}
+                self.TTN_data["CompCertificates"] = {}
+
                 #reading addtional info containg informatino about certificates
                 delta = 0
                 while True:
                     cell_value = sheet.cell(INFO_ROW + delta, INFO_COLUMN).value
-                    if cell_value[0] in 'Сс':
+                    if cell_value != '' and cell_value[0] in 'Сс':
                         cert_search_res = re.findall(MATCH_PATTERN, cell_value, re.M)
                         try:
                             #only unique cert numbers needed for the file
@@ -149,10 +159,25 @@ class TTNReader(object):
                         delta += 1
                     else:
                         break
+                    
+                #finding cell with inscription of complacency certificates copy
+                l = len(LAST_ROW_IDENTIFIER)
+                for i in range(COPY_TEST_START_ROW , COPY_TEST_END_ROW):
+                    if str(sheet.cell(i, COPY_TEST_COLUMN).value)[:l] == LAST_ROW_IDENTIFIER:
+                        inscr = sheet.cell(i, COPY_TEST_COLUMN).value
+                        break
+                matches = re.findall(COMPLACENCY_CERT_PATTERN, inscr, re.M)
+                for match in matches:
+                    try:
+                        comp_cert_array[match]=''
+                    except:
+                        pass
+                                
         except:
             pass
         finally:
             self.TTN_data["Certificates"] = cert_array
+            self.TTN_data["CompCertificates"] = comp_cert_array
 
 my_gui = MyFirstGUI(root)
 root.mainloop()
