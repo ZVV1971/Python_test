@@ -1,6 +1,7 @@
 from tkinter import Tk, Label, Button, Menu, Menubutton
 import tkinter.filedialog as Dialog
 import xlrd
+import pprint
 import re
 
 root = Tk()
@@ -22,7 +23,7 @@ MATCH_PATTERN = r'(\d{8})'
 
 class MyFirstGUI:
 
-    fileData=[]
+    fileData= []
         
     def __init__(self, master):
         self.master = master
@@ -57,8 +58,8 @@ class MyFirstGUI:
         for nm in filename:
 
             try:
-                fn = TTNReader(nm)
-                self.fileData.append(fn)
+                ob = TTNReader(nm)
+                self.fileData.append(ob)
             except:
                 continue
             
@@ -69,17 +70,21 @@ class MyFirstGUI:
         Prepares PDFs with inscriptions
         """
         for ttn in self.fileData:
-            print(ttn.TTN_data["path"])
+            print(ttn)
         
-class TTNReader():
+class TTNReader(object):
 
     TTN_data = {}
     
     def __init__(self, path):
         if self.CheckCorrectExcelFile(path):
             self.TTN_data["path"]=path
+            self.ReadDataFromTTN(path)
         else:
             raise ValueError()
+
+    def __repr__(self):
+        return pprint.pformat(self.TTN_data)
     
     def CheckCorrectExcelFile(self, path_to_file):
         """
@@ -103,6 +108,41 @@ class TTNReader():
             pass
         finally:
             return res
+    def ReadDataFromTTN(self, path_to_file):
+        """
+        Reads information from TTN
+        """
+
+        cert_array={}
+
+        try:
+            with xlrd.open_workbook(path_to_file,
+                                    encoding_override='cp1251') as book:
+                sheet = book.sheets()[0]
+                #reading other data from the file
+                self.TTN_data["Agreement"] = sheet.cell(AGREEMENT_ROW, AGREEMENT_COLUMN)
+                self.TTN_data["TTN_Number"] = sheet.cell(TTN_NUMBER_ROW, TTN_NUMBER_COLUMN)
+                self.TTN_data["Consignee"] = sheet.cell(CONSIGNEE_ROW, CONSIGNEE_COLUMN)
+                self.TTN_data["Certificates"] = {}
+                #reading addtional info containg informatino about certificates
+                delta = 0
+                while True:
+                    cell_value = sheet.cell(INFO_ROW + delta, INFO_COLUMN).value
+                    if cell_value[0] in 'Сс':
+                        cert_search_res = re.findall(MATCH_PATTERN, cell_value, re.M)
+                        try:
+                            #only unique cert numbers needed for the file
+                            for cer in cert_search_res:
+                                cert_array[cer] = ''
+                        except:
+                            pass
+                        delta += 1
+                    else:
+                        break
+        except:
+            pass
+        finally:
+            self.TTN_data["Certificates"] = cert_array
 
 my_gui = MyFirstGUI(root)
 root.mainloop()
