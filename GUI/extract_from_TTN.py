@@ -1,5 +1,7 @@
 from tkinter import Tk, Label, Button, Menu, Menubutton
 import tkinter.filedialog as Dialog
+import xlrd
+import re
 
 root = Tk()
 
