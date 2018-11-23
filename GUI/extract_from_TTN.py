@@ -3,6 +3,7 @@ import tkinter.filedialog as Dialog
 import xlrd
 import pprint
 import re
+import os
 
 root = Tk()
 
@@ -49,7 +50,7 @@ class MyFirstGUI:
     def open(self):
         print("Opening files")
 
-        filename = Dialog.askopenfilename(initialdir = "/",
+        filename = Dialog.askopenfilename(initialdir = os.path.dirname(__file__),
                                           title="Файлы с ТТН",
                                           #need to leave comma to build 1-x tuple
                                           filetypes = (("Excel files","*.xls"),),
@@ -74,11 +75,9 @@ class MyFirstGUI:
             print(ttn)
         
 class TTNReader(object):
-
-    
     
     def __init__(self, path):
-        TTN_data = {}
+        self.TTN_data = {}
         if self.CheckCorrectExcelFile(path):
             self.TTN_data["path"]=path
             self.ReadDataFromTTN(path)
