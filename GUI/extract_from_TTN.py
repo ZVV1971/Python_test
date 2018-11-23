@@ -156,4 +156,3 @@ class TTNReader(object):
 
 my_gui = MyFirstGUI(root)
 root.mainloop()
-
