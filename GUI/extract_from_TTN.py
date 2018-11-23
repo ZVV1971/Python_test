@@ -11,16 +11,18 @@ TEST_ROW = 22
 TEST_COLUM = 6
 TEST_VALUE = 'I. ТОВАРНЫЙ РАЗДЕЛ'
 #Begin of cells with additional info
-INFO_ROW = 28
-INFO_COLUMN = 13
-CONSIGNEE_ROW= 16
-CONSIGNEE_COLUMN = 3
-AGREEMENT_ROW = 17
-AGREEMENT_COLUMN = 3
-TTN_NUMBER_ROW = 3
-TTN_NUMBER_COLUMN = 13
-MATCH_PATTERN = r'(\d{8})'
-
+INFO_ROW = 28          #Row where positions begin to appear
+INFO_COLUMN = 13       #Column where additional info about positions is stored
+CONSIGNEE_ROW= 16      #Row where consignee is stored
+CONSIGNEE_COLUMN = 3   #Column where consignee is stored
+AGREEMENT_ROW = 17     #Row where agreement inscription is stored
+AGREEMENT_COLUMN = 3   #Column where agreement inscription is stored
+TTN_NUMBER_ROW = 3     #Row where TTN number is stored
+TTN_NUMBER_COLUMN = 13 #Column where TTN number is stored
+MATCH_PATTERN = r'(\d{8})' #QC match pattern
+LAST_ROW_IDENTIFIER = 'С товаром переданы документы:'
+COPY_TEST_COLUMN = 1 #colum where inscription of
+                     #complacency certificates copy is stored
 
 class MyFirstGUI:
 
