@@ -4,6 +4,7 @@ import xlrd
 import pprint
 import re
 import os
+import dateparser
 
 root = Tk()
 
@@ -19,10 +20,13 @@ AGREEMENT_ROW = 17     #Row where agreement inscription is stored
 AGREEMENT_COLUMN = 3   #Column where agreement inscription is stored
 TTN_NUMBER_ROW = 3     #Row where TTN number is stored
 TTN_NUMBER_COLUMN = 13 #Column where TTN number is stored
+DATE_ROW = 10          #Row with TTN Date
+DATE_COLUMN = 1        #Column with TTN date
 MATCH_PATTERN = r'(\d{8})' #QC match pattern
 LAST_ROW_IDENTIFIER = 'С товаром переданы документы:'
 COPY_TEST_COLUMN = 1 #colum where inscription of
                      #complacency certificates copy is stored
+ADDRESS_BEGINNING_PATTERN = 'г\.|Минская|Витебская|Могилевская|Гомельская|Гродненская|Брестская|Республика|Минск'
 
 class MyFirstGUI:
 
@@ -125,7 +129,10 @@ class TTNReader(object):
                 #reading other data from the file
                 self.TTN_data["Agreement"] = sheet.cell(AGREEMENT_ROW, AGREEMENT_COLUMN)
                 self.TTN_data["TTN_Number"] = sheet.cell(TTN_NUMBER_ROW, TTN_NUMBER_COLUMN)
-                self.TTN_data["Consignee"] = sheet.cell(CONSIGNEE_ROW, CONSIGNEE_COLUMN)
+                Cons = sheet.cell(CONSIGNEE_ROW, CONSIGNEE_COLUMN)
+                res = re.findall(Cons, ADDRESS_BEGINNING_PATTERN. re.M)
+                #self.TTN_data["Consignee"] = re.findall(Cons, ADDRESS_BEGINNING_PATTERN. re.M)
+                self.TTN_data["TTN_Date"] = dateparser.parse(sheet.cell(DATE_ROW, DATE_COLUMN).value)
                 self.TTN_data["Certificates"] = {}
                 #reading addtional info containg informatino about certificates
                 delta = 0
