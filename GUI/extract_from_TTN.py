@@ -55,14 +55,15 @@ class MyFirstGUI:
                                           filetypes = (("Excel files","*.xls"),),
                                           multiple=True
                                           )
+        if len(filename) == 0: return
+        
         for nm in filename:
-
             try:
                 ob = TTNReader(nm)
                 self.fileData.append(ob)
             except:
                 continue
-            
+        if len(self.fileData)==0: return    
         self.menubar.entryconfig("Operations", state="normal")
 
     def copies(self):
@@ -74,9 +75,10 @@ class MyFirstGUI:
         
 class TTNReader(object):
 
-    TTN_data = {}
+    
     
     def __init__(self, path):
+        TTN_data = {}
         if self.CheckCorrectExcelFile(path):
             self.TTN_data["path"]=path
             self.ReadDataFromTTN(path)

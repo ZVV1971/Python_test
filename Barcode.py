@@ -1,7 +1,7 @@
 from reportlab.graphics.barcode import code39, code128, code93
 from reportlab.graphics.barcode import eanbc, qr, usps
 from reportlab.graphics.shapes import Drawing 
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.graphics import renderPDF
@@ -12,7 +12,7 @@ def createBarCodes():
     """
     Create barcode examples and embed in a PDF
     """
-    c = canvas.Canvas("barcodes.pdf", pagesize=letter)
+    c = canvas.Canvas("barcodes.pdf", pagesize=A4)
  
     barcode_value = "1234567890"
  
@@ -57,7 +57,7 @@ def createBarCodes():
     renderPDF.draw(d, c, 15, 465)
  
     # draw a QR code
-    qr_code = qr.QrCodeWidget('www.mousevspython.com')
+    qr_code = qr.QrCodeWidget('https://stackoverflow.com/questions/10147455/how-to-send-an-email-with-gmail-as-provider-using-python')
     bounds = qr_code.getBounds()
     width = bounds[2] - bounds[0]
     height = bounds[3] - bounds[1]
