@@ -1,12 +1,11 @@
 from tkinter import Tk, Label, Button, Menu, Menubutton, messagebox
+from tkinter import Listbox as Listbox
 import tkinter.filedialog as Dialog
 import xlrd
 import pprint
 import re
 import os
 import dateparser
-
-root = Tk()
 
 #Vlues to test if XLS is really TTN
 TEST_ROW = 22
@@ -32,29 +31,47 @@ COPY_TEST_END_ROW = 1000 #Supposed end of the TTN
 ADDRESS_BEGINNING_PATTERN = 'г\.|Минская\w|Витебская\w|Могилевская\w|Гомельская\w|Гродненская\w|Брестская\w|Республика\w'
 COMPLACENCY_CERT_PATTERN = 'BY\/\d{3}\s(?:\d{2}\.){2}\d{3}\s(\d{5})'
 
+#Need to define dictionary throwing an exception
+#when duplicate key is added
+#https://stackoverflow.com/questions/4999233/how-to-raise-error-if-duplicates-keys-in-dictionary
+class RejectingDict(dict):
+    def __setitem__(self, k, v):
+        if k in self.keys():
+            raise ValueError("Key is already present")
+        else:
+            return super(RejectingDict, self).__setitem__(k, v)
+
 class MyFirstGUI:
 
-    fileData= []
+    fileData= RejectingDict()
         
     def __init__(self, master):
         self.master = master
         master.title("Сертификаты из ТТН")
         master.geometry("300x100")
         menu = Menu(master, tearoff=0)
-        menu2 = Menu(master, tearoff=0)
+        #need to store submenu to be able to address it from others subs
+        self.menu2 = Menu(master, tearoff=0)
         menu3 = Menu(master, tearoff=0)
 
         self.menubar=Menu(menu, tearoff=0)
+        
         menu.add_command(label="Open", command=self.open)
         menu.add_separator()
-        mm=menu.add_command(label="Exit", command=master.destroy)
+        menu.add_command(label="Exit", command=master.destroy)
+        #cascade index = 0
         self.menubar.add_cascade(label="File", menu=menu, state="normal")
 
-        menu2.add_command(label="Copies", command=self.copies, state="disabled")
-        self.menubar.add_cascade(label="Operations", menu=menu2)
+        self.menu2.add_command(label="Copies", command=self.copies, state="disabled")
+        #cascade index = 1
+        self.menubar.add_cascade(label="Operations", menu=self.menu2)
 
         menu3.add_command(label="About", command=self.about)
+        #cascade index = 2
         self.menubar.add_cascade(label="Help", menu=menu3)
+
+        self.lbMain = Listbox(master, selectmode='extended', state="disabled")
+        self.lbMain.pack(fill="both", expand=True)
 
         master.config(menu=self.menubar)
 
@@ -64,6 +81,7 @@ class MyFirstGUI:
                             " PDFs with complacency certificates on the same basis")
     def open(self):
         print("Opening files")
+        #self.fileData={}
 
         filename = Dialog.askopenfilename(initialdir = os.path.dirname(__file__),
                                           title="Файлы с ТТН",
@@ -76,17 +94,26 @@ class MyFirstGUI:
         for nm in filename:
             try:
                 ob = TTNReader(nm)
-                self.fileData.append(ob)
+                self.fileData[ob.TTN_data["TTN_Number"]] = ob
+                #filling in the listbox
+                self.lbMain.config(state='normal')
+                self.lbMain.insert('end', str(ob.TTN_data["TTN_Number"]))
+                self.lbMain.config(state='disabled')
             except:
                 continue
-        if len(self.fileData)==0: return    
-        self.menubar.entryconfig("Copies", state="normal")
+        
+        if len(self.fileData)==0:
+            return
+        else:
+            #reenable Copies menuitem
+            self.menu2.entryconfig('Copies', state="normal")
+            self.lbMain.config(state='normal')
 
     def copies(self):
         """
         Prepares PDFs with inscriptions
         """
-        for ttn in self.fileData:
+        for ttn in self.fileData.values():
             print(ttn)
         
 class TTNReader(object):
@@ -185,5 +212,9 @@ class TTNReader(object):
             self.TTN_data["Certificates"] = cert_array
             self.TTN_data["CompCertificates"] = comp_cert_array
 
+###############################
+# Main Part
+###############################
+root = Tk()
 my_gui = MyFirstGUI(root)
 root.mainloop()
