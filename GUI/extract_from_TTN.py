@@ -53,6 +53,7 @@ class MyFirstGUI:
         #need to store submenu to be able to address it from others subs
         self.menu2 = Menu(master, tearoff=0)
         menu3 = Menu(master, tearoff=0)
+        menu4 = Menu(master, tearoff=0)
 
         self.menubar=Menu(menu, tearoff=0)
         
@@ -66,12 +67,20 @@ class MyFirstGUI:
         #cascade index = 1
         self.menubar.add_cascade(label="Operations", menu=self.menu2)
 
-        menu3.add_command(label="About", command=self.about)
+        menu4.add_command(label="Options", command=self.options)
         #cascade index = 2
+        self.menubar.add_cascade(label="Settings", menu=menu4)
+
+        menu3.add_command(label="About", command=self.about)
+        #cascade index = 3
         self.menubar.add_cascade(label="Help", menu=menu3)
 
-        self.lbMain = Listbox(master, selectmode='extended', state="disabled")
+        self.lbMain = Listbox(master, selectmode='extended',
+                              state= "disabled")
+        #self.lbMain.grid(row=0,column=0)
         self.lbMain.pack(fill="both", expand=True)
+        
+        self.lbMain.bind('<<ListboxSelect>>', self.on_lbSelect)
 
         master.config(menu=self.menubar)
 
@@ -79,6 +88,9 @@ class MyFirstGUI:
         messagebox.showinfo(title="About", message="Program reads TTNs from Excel files " +
                             "and prints either quality certificates Consignee-wise or prepares" +
                             " PDFs with complacency certificates on the same basis")
+    def options(self):
+        pass
+    
     def open(self):
         print("Opening files")
         #self.fileData={}
@@ -96,25 +108,24 @@ class MyFirstGUI:
                 ob = TTNReader(nm)
                 self.fileData[ob.TTN_data["TTN_Number"]] = ob
                 #filling in the listbox
-                self.lbMain.config(state='normal')
+                if self.lbMain.size() == 0:
+                    self.lbMain.config(state='normal')
                 self.lbMain.insert('end', str(ob.TTN_data["TTN_Number"]))
-                self.lbMain.config(state='disabled')
             except:
                 continue
-        
-        if len(self.fileData)==0:
-            return
-        else:
-            #reenable Copies menuitem
+
+    def on_lbSelect(self, evt):
+        if len(self.lbMain.curselection()) !=0:
             self.menu2.entryconfig('Copies', state="normal")
-            self.lbMain.config(state='normal')
+        else:
+            self.menu2.entryconfig('Copies', state="disabled")
 
     def copies(self):
         """
         Prepares PDFs with inscriptions
         """
-        for ttn in self.fileData.values():
-            print(ttn)
+        for ttn in self.lbMain.curselection():
+            print(self.fileData[int(self.lbMain.get(ttn))].TTN_data["path"])
         
 class TTNReader(object):
     
