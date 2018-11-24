@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Button, Menu, Menubutton
+from tkinter import Tk, Label, Button, Menu, Menubutton, messagebox
 import tkinter.filedialog as Dialog
 import xlrd
 import pprint
@@ -29,7 +29,7 @@ COPY_TEST_COLUMN = 1 #colum where inscription of
                      #complacency certificates copy is stored
 COPY_TEST_START_ROW = 29 #Begin of the possible last row
 COPY_TEST_END_ROW = 1000 #Supposed end of the TTN
-ADDRESS_BEGINNING_PATTERN = 'г\.|Минская\w|Витебская\w|Могилевская\w|Гомельская\w|Гродненская\w|Брестская\w|Республика'
+ADDRESS_BEGINNING_PATTERN = 'г\.|Минская\w|Витебская\w|Могилевская\w|Гомельская\w|Гродненская\w|Брестская\w|Республика\w'
 COMPLACENCY_CERT_PATTERN = 'BY\/\d{3}\s(?:\d{2}\.){2}\d{3}\s(\d{5})'
 
 class MyFirstGUI:
@@ -42,21 +42,26 @@ class MyFirstGUI:
         master.geometry("300x100")
         menu = Menu(master, tearoff=0)
         menu2 = Menu(master, tearoff=0)
+        menu3 = Menu(master, tearoff=0)
 
         self.menubar=Menu(menu, tearoff=0)
         menu.add_command(label="Open", command=self.open)
         menu.add_separator()
         mm=menu.add_command(label="Exit", command=master.destroy)
-        
         self.menubar.add_cascade(label="File", menu=menu, state="normal")
 
-        menu2.add_command(label="Copies", command=self.copies)
-        
-        self.menubar.add_cascade(label="Operations", menu=menu2,
-                                     state="disabled")
+        menu2.add_command(label="Copies", command=self.copies, state="disabled")
+        self.menubar.add_cascade(label="Operations", menu=menu2)
+
+        menu3.add_command(label="About", command=self.about)
+        self.menubar.add_cascade(label="Help", menu=menu3)
 
         master.config(menu=self.menubar)
 
+    def about(self):
+        messagebox.showinfo(title="About", message="Program reads TTNs from Excel files " +
+                            "and prints either quality certificates Consignee-wise or prepares" +
+                            " PDFs with complacency certificates on the same basis")
     def open(self):
         print("Opening files")
 
@@ -75,7 +80,7 @@ class MyFirstGUI:
             except:
                 continue
         if len(self.fileData)==0: return    
-        self.menubar.entryconfig("Operations", state="normal")
+        self.menubar.entryconfig("Copies", state="normal")
 
     def copies(self):
         """
@@ -122,6 +127,7 @@ class TTNReader(object):
     def ReadDataFromTTN(self, path_to_file):
         """
         Reads information from TTN
+        and stores it in the dictionary
         """
 
         cert_array={}
@@ -136,7 +142,7 @@ class TTNReader(object):
                 self.TTN_data["TTN_Number"] = int(sheet.cell(TTN_NUMBER_ROW, TTN_NUMBER_COLUMN).value)
                 Cons = sheet.cell(CONSIGNEE_ROW, CONSIGNEE_COLUMN).value
                 matches = re.finditer(ADDRESS_BEGINNING_PATTERN, Cons, re.M)
-                for matchNum, match in enumerate(matches):
+                for match in matches:
                      self.TTN_data["Consignee"] = Cons[:match.start() - 1]
                      #need only the first
                      break
@@ -144,7 +150,7 @@ class TTNReader(object):
                 self.TTN_data["Certificates"] = {}
                 self.TTN_data["CompCertificates"] = {}
 
-                #reading addtional info containg informatino about certificates
+                #reading addtional info containg information about certificates
                 delta = 0
                 while True:
                     cell_value = sheet.cell(INFO_ROW + delta, INFO_COLUMN).value
@@ -166,10 +172,10 @@ class TTNReader(object):
                     if str(sheet.cell(i, COPY_TEST_COLUMN).value)[:l] == LAST_ROW_IDENTIFIER:
                         inscr = sheet.cell(i, COPY_TEST_COLUMN).value
                         break
-                matches = re.findall(COMPLACENCY_CERT_PATTERN, inscr, re.M)
-                for match in matches:
+                matches2 = re.findall(COMPLACENCY_CERT_PATTERN, inscr, re.M)
+                for match2 in matches2:
                     try:
-                        comp_cert_array[match]=''
+                        comp_cert_array[match2]=''
                     except:
                         pass
                                 
