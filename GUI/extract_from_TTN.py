@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Button, Menu, Menubutton, messagebox
+from tkinter import Tk, Label, Button, Menu, Menubutton, messagebox, Frame
 from tkinter import Listbox as Listbox
 import tkinter.filedialog as Dialog
 import xlrd
@@ -77,8 +77,12 @@ class MyFirstGUI:
 
         self.lbMain = Listbox(master, selectmode='extended',
                               state= "disabled")
-        #self.lbMain.grid(row=0,column=0)
         self.lbMain.pack(fill="both", expand=True)
+
+        # status bar
+        self.status_frame = Frame(master)
+        self.status = Label(self.status_frame, text="this is the status bar")
+        self.status.pack(fill="both", expand=True)
         
         self.lbMain.bind('<<ListboxSelect>>', self.on_lbSelect)
 
@@ -154,6 +158,7 @@ class TTNReader(object):
             with xlrd.open_workbook(path_to_file,
                                     encoding_override='cp1251') as book:
                 sheet = book.sheets()[0]
+                #print(sheet.cell(TEST_ROW, TEST_COLUM).value)
                 if sheet.cell(TEST_ROW, TEST_COLUM).value == TEST_VALUE:
                     res = True
                 else:
