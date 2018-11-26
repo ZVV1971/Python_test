@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Button, Menu, Menubutton, messagebox, Frame
+from tkinter import Tk, Label, Button, Menu, Menubutton, messagebox, Frame, Scrollbar
 from tkinter import Listbox as Listbox
 import tkinter.filedialog as Dialog
 import xlrd
@@ -77,13 +77,16 @@ class MyFirstGUI:
 
         self.lbMain = Listbox(master, selectmode='extended',
                               state= "disabled")
-        self.lbMain.pack(fill="both", expand=True)
+        self.lbMain.pack(fill="both", expand = True)
+        Scrollbar(self.lbMain, orient = 'vertical').pack(side = 'right', fill = 'y')
+        
+        self.lbMain.grid(row = 0, column = 0, sticky = 'n, s')
 
         # status bar
         self.status_frame = Frame(master)
         self.status = Label(self.status_frame, text="this is the status bar")
         self.status.pack(fill="both", expand=True)
-        
+        self.status_frame.grid(row = 1, column = 0)
         self.lbMain.bind('<<ListboxSelect>>', self.on_lbSelect)
 
         master.config(menu=self.menubar)
