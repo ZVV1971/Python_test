@@ -51,9 +51,9 @@ class MyFirstGUI:
         master.geometry("300x100")
         menu = Menu(master, tearoff=0)
         #need to store submenu to be able to address it from others subs
-        self.menu2 = Menu(master, tearoff=0)
-        menu3 = Menu(master, tearoff=0)
-        menu4 = Menu(master, tearoff=0)
+        self.submenu2 = Menu(master, tearoff=0)
+        submenu3 = Menu(master, tearoff=0)
+        submenu4 = Menu(master, tearoff=0)
 
         self.menubar=Menu(menu, tearoff=0)
         
@@ -63,30 +63,32 @@ class MyFirstGUI:
         #cascade index = 0
         self.menubar.add_cascade(label="File", menu=menu, state="normal")
 
-        self.menu2.add_command(label="Copies", command=self.copies, state="disabled")
+        self.submenu2.add_command(label="Copies", command=self.copies, state="disabled")
         #cascade index = 1
-        self.menubar.add_cascade(label="Operations", menu=self.menu2)
+        self.menubar.add_cascade(label="Operations", menu=self.submenu2)
 
-        menu4.add_command(label="Options", command=self.options)
+        submenu4.add_command(label="Options", command=self.options)
         #cascade index = 2
-        self.menubar.add_cascade(label="Settings", menu=menu4)
+        self.menubar.add_cascade(label="Settings", menu=submenu4)
 
-        menu3.add_command(label="About", command=self.about)
+        submenu3.add_command(label="About", command=self.about)
         #cascade index = 3
-        self.menubar.add_cascade(label="Help", menu=menu3)
+        self.menubar.add_cascade(label="Help", menu=submenu3)
 
         self.lbMain = Listbox(master, selectmode='extended',
                               state= "disabled")
-        self.lbMain.pack(fill="both", expand = True)
-        Scrollbar(self.lbMain, orient = 'vertical').pack(side = 'right', fill = 'y')
+        #self.lbMain.pack(fill="both", expand = True)
+        self.scrollbar = Scrollbar(master, orient = 'vertical')
+        self.lbMain.config(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.config(command= self.lbMain.yview)
         
         self.lbMain.grid(row = 0, column = 0, sticky = 'n, s')
 
         # status bar
-        self.status_frame = Frame(master)
-        self.status = Label(self.status_frame, text="this is the status bar")
+        status_frame = Frame(master)
+        self.status = Label(status_frame, text="this is the status bar")
         self.status.pack(fill="both", expand=True)
-        self.status_frame.grid(row = 1, column = 0)
+        status_frame.grid(row = 1, column = 0)
         self.lbMain.bind('<<ListboxSelect>>', self.on_lbSelect)
 
         master.config(menu=self.menubar)
@@ -123,9 +125,9 @@ class MyFirstGUI:
 
     def on_lbSelect(self, evt):
         if len(self.lbMain.curselection()) !=0:
-            self.menu2.entryconfig('Copies', state="normal")
+            self.submenu2.entryconfig('Copies', state="normal")
         else:
-            self.menu2.entryconfig('Copies', state="disabled")
+            self.submenu2.entryconfig('Copies', state="disabled")
 
     def copies(self):
         """
