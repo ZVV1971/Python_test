@@ -49,6 +49,8 @@ class MyFirstGUI:
         self.master = master
         master.title("Сертификаты из ТТН")
         master.geometry("300x100")
+        master.grid_columnconfigure(index = 0, minsize = 350, weight = 5)
+        master.grid_columnconfigure(index = 1, weight = 0)
         menu = Menu(master, tearoff=0)
         #need to store submenu to be able to address it from others subs
         self.submenu2 = Menu(master, tearoff=0)
@@ -76,11 +78,12 @@ class MyFirstGUI:
         self.menubar.add_cascade(label="Help", menu=submenu3)
 
         self.lbMain = Listbox(master, selectmode='extended',
-                              state= "disabled")
+                              state= "disabled", width =200)
         #self.lbMain.pack(fill="both", expand = True)
         self.scrollbar = Scrollbar(master, orient = 'vertical')
         self.lbMain.config(yscrollcommand=self.scrollbar.set)
         self.scrollbar.config(command= self.lbMain.yview)
+        #self.scrollbar.pack()
         
         self.lbMain.grid(row = 0, column = 0, sticky = 'n, s')
 
