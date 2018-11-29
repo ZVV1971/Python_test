@@ -44,18 +44,19 @@ class RejectingDict(dict):
 class MyFirstGUI:
 
     fileData= RejectingDict()
+    last_statusbar_value=''
         
     def __init__(self, master):
         self.master = master
         master.title("Сертификаты из ТТН")
         master.geometry("300x100")
         master.grid_columnconfigure(index = 0, minsize = 350, weight = 5)
-        master.grid_columnconfigure(index = 1, weight = 0)
+        #master.grid_columnconfigure(index = 1, weight = 0)
         menu = Menu(master, tearoff=0)
         #need to store submenu to be able to address it from others subs
         self.submenu2 = Menu(master, tearoff=0)
-        submenu3 = Menu(master, tearoff=0)
-        submenu4 = Menu(master, tearoff=0)
+        self.submenu3 = Menu(master, tearoff=0)
+        self.submenu4 = Menu(master, tearoff=0)
 
         self.menubar=Menu(menu, tearoff=0)
         
@@ -66,36 +67,61 @@ class MyFirstGUI:
         self.menubar.add_cascade(label="File", menu=menu, state="normal")
 
         self.submenu2.add_command(label="Copies", command=self.copies, state="disabled")
+
         #cascade index = 1
         self.menubar.add_cascade(label="Operations", menu=self.submenu2)
 
-        submenu4.add_command(label="Options", command=self.options)
+        self.submenu4.add_command(label="Options", command=self.options)
         #cascade index = 2
-        self.menubar.add_cascade(label="Settings", menu=submenu4)
+        self.menubar.add_cascade(label="Settings", menu=self.submenu4)
 
-        submenu3.add_command(label="About", command=self.about)
+        self.commandAbout = self.submenu3.add_command(label="About", command=self.about)
         #cascade index = 3
-        self.menubar.add_cascade(label="Help", menu=submenu3)
+        self.menubar.add_cascade(label="Help", menu=self.submenu3)
 
         self.lbMain = Listbox(master, selectmode='extended',
-                              state= "disabled", width =200)
-        #self.lbMain.pack(fill="both", expand = True)
+                              state= "disabled", width =50, #width in characters
+                              height = 5 #number of lines
+                              )
         self.scrollbar = Scrollbar(master, orient = 'vertical')
         self.lbMain.config(yscrollcommand=self.scrollbar.set)
         self.scrollbar.config(command= self.lbMain.yview)
-        #self.scrollbar.pack()
+        self.scrollbar.grid(row = 0, column =0, ipady = 0,
+                            sticky ='e' # just to the right side East
+                            )
         
-        self.lbMain.grid(row = 0, column = 0, sticky = 'n, s')
+        self.lbMain.grid(row = 0, column = 0,
+                         sticky = 'n, s, e, w' #to all sides
+                         )
 
         # status bar
-        status_frame = Frame(master)
+        status_frame = Frame(master, height = 10)
         self.status = Label(status_frame, text="this is the status bar")
-        self.status.pack(fill="both", expand=True)
+        self.status.pack(fill="both", expand = True)
         status_frame.grid(row = 1, column = 0)
         self.lbMain.bind('<<ListboxSelect>>', self.on_lbSelect)
+        self.submenu3.bind('<<MenuSelect>>', self.about_status)
+        self.submenu3.bind('<Enter>', self.about_status)
+        self.submenu4.bind('<<MenuSelect>>', self.options_status)
+        self.submenu4.bind('<Enter>', self.options_status)
+        self.submenu3.bind('<Leave>', self.status_leave)
+        self.submenu4.bind('<Leave>', self.status_leave)
 
         master.config(menu=self.menubar)
 
+    def about_status(self, event):
+        self.last_statusbar_value = self.status['text']
+        self.status['text'] = 'About'
+        print(event.widget)
+
+    def options_status(self, event):
+        self.last_statusbar_value = self.status['text']
+        self.status['text'] = 'Options'
+        print(event.widget)
+
+    def status_leave(self,event):
+        self.status['text'] = self.last_statusbar_value
+        
     def about(self):
         messagebox.showinfo(title="About", message="Program reads TTNs from Excel files " +
                             "and prints either quality certificates Consignee-wise or prepares" +
@@ -105,8 +131,7 @@ class MyFirstGUI:
     
     def open(self):
         print("Opening files")
-        #self.fileData={}
-
+ 
         filename = Dialog.askopenfilename(initialdir = os.path.dirname(__file__),
                                           title="Файлы с ТТН",
                                           #need to leave comma to build 1-x tuple
